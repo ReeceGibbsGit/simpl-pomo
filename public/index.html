@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>simpl-pomo</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <h1>simpl-pomo</h1>
+
+      <svg id="hourglass" class="hourglass" viewBox="0 0 200 320" role="img" aria-label="Hourglass showing the time left">
+        <defs>
+          <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#a86b34" />
+            <stop offset="0.45" stop-color="#7a4520" />
+            <stop offset="1" stop-color="#4e2a12" />
+          </linearGradient>
+          <linearGradient id="wood-post" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#5a3216" />
+            <stop offset="0.5" stop-color="#a0662f" />
+            <stop offset="1" stop-color="#4e2a12" />
+          </linearGradient>
+          <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.35" />
+            <stop offset="0.3" stop-color="#ffffff" stop-opacity="0.08" />
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0.2" />
+          </linearGradient>
+          <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#f0cf8a" />
+            <stop offset="1" stop-color="#c9954a" />
+          </linearGradient>
+          <clipPath id="clip-top">
+            <path d="M50,34 C50,100 92,130 96,160 L104,160 C108,130 150,100 150,34 Z" />
+          </clipPath>
+          <clipPath id="clip-bottom">
+            <path d="M96,160 C92,190 50,220 50,286 L150,286 C150,220 108,190 104,160 Z" />
+          </clipPath>
+        </defs>
+
+        <!-- back posts -->
+        <rect x="26" y="26" width="10" height="268" rx="4" fill="url(#wood-post)" />
+        <rect x="164" y="26" width="10" height="268" rx="4" fill="url(#wood-post)" />
+
+        <!-- sand -->
+        <g clip-path="url(#clip-top)">
+          <rect id="sand-top" x="40" y="60" width="120" height="100" fill="url(#sand)" />
+        </g>
+        <line id="sand-stream" class="sand-stream" x1="100" y1="158" x2="100" y2="286" />
+        <g clip-path="url(#clip-bottom)">
+          <path id="sand-bottom" d="M40,286 V286 H160 V286 Z" fill="url(#sand)" />
+        </g>
+
+        <!-- glass -->
+        <path
+          class="glass"
+          d="M50,34 C50,100 92,130 96,160 C92,190 50,220 50,286 L150,286 C150,220 108,190 104,160 C108,130 150,100 150,34 Z"
+          fill="url(#glass)"
+        />
+
+        <!-- front posts and plates -->
+        <rect x="16" y="10" width="168" height="24" rx="6" fill="url(#wood)" />
+        <rect x="16" y="286" width="168" height="24" rx="6" fill="url(#wood)" />
+        <rect x="40" y="26" width="8" height="268" rx="3" fill="url(#wood-post)" />
+        <rect x="152" y="26" width="8" height="268" rx="3" fill="url(#wood-post)" />
+      </svg>
+
+      <p id="display" class="display" aria-live="off">25:00</p>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <form id="duration-form" class="duration" autocomplete="off">
+        <label for="duration">Duration (minutes, mm:ss or h:mm:ss)</label>
+        <input id="duration" name="duration" type="text" inputmode="decimal" value="25" spellcheck="false" />
+        <p id="duration-message" class="message" role="alert"></p>
+      </form>
+
+      <div class="controls">
+        <button id="start" type="button" class="primary">Start</button>
+        <button id="pause" type="button" disabled>Pause</button>
+        <button id="reset" type="button">Reset</button>
+        <button id="stop-alarm" type="button" class="alarm" hidden>Stop alarm</button>
+      </div>
+
+      <section class="preset-section" aria-label="Presets">
+        <div id="presets" class="presets"></div>
+        <button id="add-preset" type="button" class="add-preset">+ Add preset from duration</button>
+      </section>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
