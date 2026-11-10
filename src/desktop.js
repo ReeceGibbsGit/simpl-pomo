@@ -1,5 +1,8 @@
-// Desktop helpers for the Electron main process: window options and the data
-// folder. Pure functions with no electron import, so tests run in plain Node.
+// Desktop helpers for the Electron main process: window options, the data
+// folder, navigation checks and the local server. No electron import, so
+// tests run in plain Node.
+
+import { createServer, listen, HOST } from './app-server.js';
 
 // Matches --bg in public/style.css so the window does not flash white.
 const BACKGROUND = '#2b1d14';
@@ -50,4 +53,15 @@ export function windowOptions({ env }) {
       autoplayPolicy: 'no-user-gesture-required',
     },
   };
+}
+
+/**
+ * Starts the existing server on 127.0.0.1 with a free port picked by the
+ * system. Rejects if the server cannot listen.
+ * @param {{ dataDir: string, publicDir: string }} options
+ * @returns {Promise<{ server: import('node:http').Server, url: string }>}
+ */
+export async function startLocalServer({ dataDir, publicDir }) {
+  const server = await listen(createServer({ dataDir, publicDir }), 0);
+  return { server, url: `http://${HOST}:${server.address().port}/` };
 }
