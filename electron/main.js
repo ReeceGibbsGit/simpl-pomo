@@ -3,8 +3,9 @@
 
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { app, BrowserWindow, Menu, dialog } from 'electron';
+import { app, BrowserWindow, Menu, dialog, screen } from 'electron';
 import { dataDirFor, isAppUrl, startLocalServer, windowOptions } from '../src/desktop.js';
+import { fitWindowToPage } from './fit-window.js';
 
 const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
 
@@ -20,7 +21,6 @@ async function start() {
   Menu.setApplicationMenu(null);
   win = new BrowserWindow(windowOptions({ env: process.env }));
   win.setMenuBarVisibility(false);
-  win.once('ready-to-show', () => win.show());
   win.on('closed', () => {
     win = null;
   });
@@ -29,7 +29,11 @@ async function start() {
   });
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
 
+  // loadURL resolves on did-finish-load. Fit the window to the page while it
+  // is still hidden, then show it, so it opens with no scrollbar.
   await win.loadURL(started.url);
+  await fitWindowToPage(win, screen);
+  win.show();
 }
 
 if (!app.requestSingleInstanceLock()) {

@@ -68,6 +68,51 @@ test('the window is compact, has a minimum size and hides the menu bar', () => {
   assert.equal(options.title, undefined);
 });
 
+// Scenario: Window shape (no scrollbar on open)
+test('the window size is the page content size, not the outer frame', () => {
+  assert.equal(desktop.windowOptions({ env: {} }).useContentSize, true);
+});
+
+test('the content is fitted to the page size', () => {
+  const size = desktop.fitContentSize({
+    content: { width: 471.4, height: 817.2 },
+    workArea: { width: 1920, height: 1040 },
+    frame: { width: 16, height: 39 },
+    min: { width: 360, height: 640 },
+  });
+  assert.deepEqual(size, { width: 472, height: 818 });
+});
+
+test('the fitted content is capped to the screen work area minus the frame', () => {
+  const size = desktop.fitContentSize({
+    content: { width: 472, height: 818 },
+    workArea: { width: 1366, height: 728 },
+    frame: { width: 16, height: 39 },
+    min: { width: 360, height: 640 },
+  });
+  assert.deepEqual(size, { width: 472, height: 689 });
+});
+
+test('the fitted content is never smaller than the minimum size', () => {
+  const size = desktop.fitContentSize({
+    content: { width: 200, height: 300 },
+    workArea: { width: 1920, height: 1040 },
+    frame: { width: 0, height: 0 },
+    min: { width: 360, height: 640 },
+  });
+  assert.deepEqual(size, { width: 360, height: 640 });
+});
+
+test('the work area wins over the minimum size on a very small screen', () => {
+  const size = desktop.fitContentSize({
+    content: { width: 472, height: 818 },
+    workArea: { width: 320, height: 600 },
+    frame: { width: 0, height: 0 },
+    min: { width: 360, height: 640 },
+  });
+  assert.deepEqual(size, { width: 320, height: 600 });
+});
+
 // Scenario: Data folder location
 test('data is saved under <userData>/data on Windows paths', () => {
   assert.equal(
