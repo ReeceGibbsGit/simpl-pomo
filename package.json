@@ -1,0 +1,11 @@
+{
+  "name": "simpl-pomo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A quick and simple local pomodoro timer with an hourglass display.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test \"test/*.test.js\""
+  }
+}
