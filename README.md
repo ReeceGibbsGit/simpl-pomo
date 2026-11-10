@@ -10,7 +10,13 @@ A quick and simple local pomodoro timer with an old-style hourglass display.
 
 ## Requirements
 
-Node.js 24 or newer. There are no npm dependencies, so there is nothing to install.
+Node.js 24 or newer. The only npm dependency is Electron (a dev dependency). Install it once:
+
+```sh
+npm install
+```
+
+This also downloads the Electron binary.
 
 ## Run
 
@@ -18,16 +24,16 @@ Node.js 24 or newer. There are no npm dependencies, so there is nothing to insta
 npm start
 ```
 
-Then open http://127.0.0.1:4321 in your browser.
+This opens the timer in a small desktop window with no menu bar. Close the window to quit. Starting it again while it is open brings the open window to the front.
 
-The server listens on `127.0.0.1` only. To use another port, set `PORT`:
+Inside the app a local server listens on `127.0.0.1` only, on a free port picked at start. If it cannot start, a dialog says why and the app quits.
+
+If the window does not open (some endpoint security tools stop sandboxed Electron windows from launching), turn off only the sandbox:
 
 ```sh
-PORT=4322 npm start          # bash
-$env:PORT=4322; npm start    # PowerShell
+SIMPL_POMO_DISABLE_SANDBOX=1 npm start           # bash
+$env:SIMPL_POMO_DISABLE_SANDBOX=1; npm start     # PowerShell
 ```
-
-If the port is already in use, the server says so and exits.
 
 ## Test
 
@@ -39,9 +45,11 @@ This runs Node's built-in test runner over `test/*.test.js`.
 
 ## Data
 
-Custom presets and settings are saved as JSON files in `data/` next to `server.js`:
+Custom presets and settings are saved as JSON files in a `data` folder inside the Electron user data folder (for example `%APPDATA%\simpl-pomo\data` on Windows, `~/Library/Application Support/simpl-pomo/data` on macOS):
 
-- `data/presets.json` - your custom presets
-- `data/settings.json` - the last duration you started
+- `presets.json` - your custom presets
+- `settings.json` - the last duration you started
 
-The folder is created on first save and is gitignored. Delete it to start fresh.
+The folder is created on first save. Delete it to start fresh.
+
+Presets saved by the old browser version in `data/` in the repo are not carried over. Add them again in the app if you want them.
