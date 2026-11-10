@@ -116,3 +116,39 @@ export function sandFractions(state, now) {
   const top = state.durationMs > 0 ? Math.min(1, left / state.durationMs) : 0;
   return { top, bottom: 1 - top, flowing: state.running && left > 0 };
 }
+
+// Presets. Shape: { id, minutes, label }. Built-ins are fixed here and never
+// stored; custom presets get their id from storage.
+
+const BUILTIN_PREFIX = 'builtin-';
+const MAX_PRESET_MINUTES = 1440;
+const MAX_LABEL_LENGTH = 40;
+
+/** @type {ReadonlyArray<Readonly<{ id: string, minutes: number, label: string }>>} */
+export const BUILTIN_PRESETS = Object.freeze(
+  [15, 30, 45, 60].map((minutes) =>
+    Object.freeze({ id: `${BUILTIN_PREFIX}${minutes}`, minutes, label: `${minutes} min` }),
+  ),
+);
+
+/** @param {unknown} id */
+export function isBuiltinPresetId(id) {
+  return typeof id === 'string' && id.startsWith(BUILTIN_PREFIX);
+}
+
+/**
+ * Validate and clean a custom preset body `{ minutes, label? }`.
+ * @param {unknown} input
+ * @returns {{ ok: true, preset: { minutes: number, label: string } } | { ok: false, error: string }}
+ */
+export function normalisePreset(input) {
+  if (input === null || typeof input !== 'object' || Array.isArray(input)) {
+    return { ok: false, error: 'A preset needs a minutes value.' };
+  }
+  const { minutes, label } = /** @type {{ minutes?: unknown, label?: unknown }} */ (input);
+  if (typeof minutes !== 'number' || !Number.isFinite(minutes) || minutes <= 0 || minutes > MAX_PRESET_MINUTES) {
+    return { ok: false, error: `Preset minutes must be a number more than 0 and at most ${MAX_PRESET_MINUTES}.` };
+  }
+  const trimmed = typeof label === 'string' ? label.trim().slice(0, MAX_LABEL_LENGTH).trim() : '';
+  return { ok: true, preset: { minutes, label: trimmed || `${minutes} min` } };
+}
