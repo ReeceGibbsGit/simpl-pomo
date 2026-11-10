@@ -14,6 +14,21 @@ export function dataDirFor(userDataDir, join) {
 }
 
 /**
+ * True only when url is on the app's own origin (same scheme, host and port).
+ * A URL that does not parse is refused.
+ * @param {string} url
+ * @param {string} appOrigin for example http://127.0.0.1:5123
+ * @returns {boolean}
+ */
+export function isAppUrl(url, appOrigin) {
+  try {
+    return new URL(url).origin === appOrigin;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * BrowserWindow options. SIMPL_POMO_DISABLE_SANDBOX=1 turns off only the
  * sandbox, for machines whose endpoint security blocks sandboxed renderers.
  * @param {{ env: Record<string, string | undefined> }} options

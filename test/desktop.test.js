@@ -59,3 +59,32 @@ test('data is saved under <userData>/data on posix paths', () => {
     '/Users/me/Library/Application Support/simpl-pomo/data',
   );
 });
+
+// Scenario: Navigation to another site is blocked
+test('a URL on the app origin is allowed', () => {
+  const origin = 'http://127.0.0.1:5123';
+  assert.equal(desktop.isAppUrl('http://127.0.0.1:5123/', origin), true);
+  assert.equal(desktop.isAppUrl('http://127.0.0.1:5123/index.html?x=1#top', origin), true);
+});
+
+test('a URL on another origin is refused', () => {
+  const origin = 'http://127.0.0.1:5123';
+  for (const url of [
+    'https://example.com/',
+    'http://localhost:5123/',
+    'http://127.0.0.1:5124/',
+    'https://127.0.0.1:5123/',
+    'file:///C:/Windows/win.ini',
+    'http://127.0.0.1:5123.evil.com/',
+    'http://user@evil.com/?http://127.0.0.1:5123/',
+  ]) {
+    assert.equal(desktop.isAppUrl(url, origin), false, url);
+  }
+});
+
+test('a bad URL is refused', () => {
+  const origin = 'http://127.0.0.1:5123';
+  for (const url of ['', 'not a url', '://', undefined]) {
+    assert.equal(desktop.isAppUrl(url, origin), false, String(url));
+  }
+});
