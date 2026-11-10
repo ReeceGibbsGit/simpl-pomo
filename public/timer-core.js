@@ -59,3 +59,60 @@ export function formatTime(totalSeconds) {
   const sec = s % 60;
   return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
 }
+
+// Timer state model. Every function returns a new state; `now` is a
+// Date.now()-style millisecond clock reading, so remaining time comes from
+// the clock and not from counting ticks.
+
+/**
+ * @typedef {{ durationMs: number, leftMs: number, running: boolean, endAt: number | null }} TimerState
+ */
+
+/**
+ * @param {number} durationSeconds
+ * @returns {TimerState}
+ */
+export function createTimer(durationSeconds) {
+  const durationMs = Math.max(0, Number(durationSeconds) || 0) * 1000;
+  return { durationMs, leftMs: durationMs, running: false, endAt: null };
+}
+
+/**
+ * Remaining milliseconds at `now`, never below 0.
+ * @param {TimerState} state
+ * @param {number} now
+ */
+export function remainingMs(state, now) {
+  if (state.running) return Math.max(0, state.endAt - now);
+  return Math.max(0, state.leftMs);
+}
+
+/** Start or resume. @param {TimerState} state @param {number} now @returns {TimerState} */
+export function start(state, now) {
+  if (state.running) return { ...state };
+  return { ...state, running: true, endAt: now + state.leftMs };
+}
+
+/** Pause, keeping the remaining time. @param {TimerState} state @param {number} now @returns {TimerState} */
+export function pause(state, now) {
+  if (!state.running) return { ...state };
+  return { ...state, running: false, endAt: null, leftMs: remainingMs(state, now) };
+}
+
+/** Stop and restore the full duration. @param {TimerState} state @returns {TimerState} */
+export function reset(state) {
+  return { ...state, running: false, endAt: null, leftMs: state.durationMs };
+}
+
+/**
+ * Hourglass sand split: top shrinks and bottom grows with elapsed time.
+ * `flowing` is true only while running with time left (the falling stream).
+ * @param {TimerState} state
+ * @param {number} now
+ * @returns {{ top: number, bottom: number, flowing: boolean }}
+ */
+export function sandFractions(state, now) {
+  const left = remainingMs(state, now);
+  const top = state.durationMs > 0 ? Math.min(1, left / state.durationMs) : 0;
+  return { top, bottom: 1 - top, flowing: state.running && left > 0 };
+}
