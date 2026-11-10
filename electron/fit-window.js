@@ -58,7 +58,11 @@ export async function fitWindowToPage(win, screen) {
       frame,
       min: MIN_SIZE,
     });
-    win.setMinimumSize(Math.min(MIN_SIZE.width, size.width), Math.min(MIN_SIZE.height, size.height));
+    // The minimum from windowOptions is a content size. Only lower it on a
+    // screen too small for it (setMinimumSize takes a window size).
+    if (size.width < MIN_SIZE.width || size.height < MIN_SIZE.height) {
+      win.setMinimumSize(Math.min(MIN_SIZE.width, size.width), Math.min(MIN_SIZE.height, size.height));
+    }
     win.setContentSize(size.width, size.height);
   }
 }
