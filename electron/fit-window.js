@@ -3,6 +3,18 @@
 
 import { MIN_SIZE, fitContentSize } from '../src/desktop.js';
 
+// Resolves once the page has stopped changing (no DOM changes for 150 ms,
+// at most 1.5 s), so content the page fetches after load, such as custom
+// presets, is in place before the page is measured.
+const SETTLED = `new Promise((resolve) => {
+  let quiet;
+  const done = () => { observer.disconnect(); clearTimeout(quiet); clearTimeout(cap); requestAnimationFrame(() => resolve(true)); };
+  const observer = new MutationObserver(() => { clearTimeout(quiet); quiet = setTimeout(done, 150); });
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true });
+  quiet = setTimeout(done, 150);
+  const cap = setTimeout(done, 1500);
+})`;
+
 // Natural page size in CSS pixels. The body is a min-height: 100vh flex box
 // that stretches .app to the window height, so neither scrollHeight nor the
 // .app box shrink below the window. The height comes from the bottom of the
@@ -31,6 +43,8 @@ export async function fitWindowToPage(win, screen) {
   const [outerWidth, outerHeight] = win.getSize();
   const [contentWidth, contentHeight] = win.getContentSize();
   const frame = { width: outerWidth - contentWidth, height: outerHeight - contentHeight };
+
+  await win.webContents.executeJavaScript(SETTLED);
 
   // Two passes: a scrollbar showing during the first one can make the
   // page wrap a little taller than it is once the scrollbar is gone.
