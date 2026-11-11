@@ -4,8 +4,12 @@
   "private": true,
   "description": "A quick and simple local pomodoro timer with an hourglass display.",
   "type": "module",
+  "main": "electron/main.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "electron .",
     "test": "node --test \"test/*.test.js\""
+  },
+  "devDependencies": {
+    "electron": "45.2.3"
   }
 }
