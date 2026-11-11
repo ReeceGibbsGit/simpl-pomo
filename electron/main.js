@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { app, BrowserWindow, Menu, dialog, screen } from 'electron';
 import { dataDirFor, isAppUrl, startLocalServer, windowOptions } from '../src/desktop.js';
-import { fitWindowToPage } from './fit-window.js';
+import { createAutoFit, fitWindowToPage, pageCalls } from '../src/window-fit.js';
 
 const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
 
@@ -32,8 +32,20 @@ async function start() {
   // loadURL resolves on did-finish-load. Fit the window to the page while it
   // is still hidden, then show it, so it opens with no scrollbar.
   await win.loadURL(started.url);
-  await fitWindowToPage(win, screen);
+  const page = pageCalls(win);
+  await fitWindowToPage(win, screen, page);
   win.show();
+
+  // Refit the height when the page content changes size (presets added or
+  // deleted), until the user resizes the window themselves.
+  createAutoFit({
+    win,
+    refit: async () => {
+      if (!win || win.isMinimized()) return;
+      await fitWindowToPage(win, screen, { measure: page.measure, settle: async () => {}, heightOnly: true });
+    },
+  });
+  await page.watch();
 }
 
 if (!app.requestSingleInstanceLock()) {

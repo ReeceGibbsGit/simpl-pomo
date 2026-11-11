@@ -22,7 +22,9 @@ export const MIN_SIZE = { width: 360, height: 640 };
  * @returns {{ width: number, height: number }}
  */
 export function fitContentSize({ content, workArea, frame = { width: 0, height: 0 }, min = MIN_SIZE }) {
-  const fit = (want, least, most) => Math.max(1, Math.min(Math.max(Math.ceil(want), least), Math.floor(most)));
+  // The small allowance stops float noise (700 * 1.1 = 770.0000000000001)
+  // from adding a pixel.
+  const fit = (want, least, most) => Math.max(1, Math.min(Math.max(Math.ceil(want - 0.001), least), Math.floor(most)));
   return {
     width: fit(content.width, min.width, workArea.width - frame.width),
     height: fit(content.height, min.height, workArea.height - frame.height),
